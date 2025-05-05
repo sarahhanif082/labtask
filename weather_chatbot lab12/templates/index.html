@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Weather Chatbot</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <button onclick="getWeather()">Get Weather</button>
+
+    <script>
+        function appendMessage(sender, text) {
+            const chatbox = document.getElementById('chatbox');
+            const message = document.createElement('div');
+            message.className = 'message ' + sender;
+            message.textContent = (sender === 'user' ? 'You: ' : 'Bot: ') + text;
+            chatbox.appendChild(message);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            if (!city) return;
+            appendMessage('user', city);
+
+            fetch('/get_weather', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'city=' + encodeURIComponent(city)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    appendMessage('bot', data.error);
+                } else {
+                    appendMessage('bot', `Weather in ${data.city}: ${data.temperature}°C, ${data.description}`);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
